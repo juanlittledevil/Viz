@@ -1,30 +1,39 @@
+// --  Viz --
+// Version 1.0
 // Author: Juan Segovia
+// Description: Audio Visualizer app. process audio from maxim player.
+// Created: 7/14/13
+
 
 Maxim maxim;
 AudioPlayer player;
 
-float time = 0;
-float time2 = 0;
-boolean playAudio;
+int xPos = 0;                    // init only..
+int brightness = 0;              // init only..
+int elements = 64;               // this gets randomized later...
+int wait = 0;                    // init only..
+int fade = 0;                    // init only..
+boolean playAudio;               // init only..
+boolean pos = true;              // init only.. (used to move through space)
+boolean changeShape = false;     // init only.. (used to determine if it's time to swich shapes)
+float threshold = 0.3;          // Adjust sensitivity. (change until beat is detected)
+float thresh2 = 0.38;
+float fadeThresh = 0.1;
+float amp = 0;                   // init only.. (used in beat detection.)
+float magnify = 400;             // used to set how much of the screen we use or go out of...
+float rotation = 0;              // init only..
+float radius = 0;                // init only..
+float time = 0;                  // init only..
+float time2 = 0;                 // init only..
 //float[] spec;
-float power = 0;
-float topPower = 0;
-float go;
-int xPos = 0;
-boolean pos = true;
-boolean changeShape = false;
-int fade = 0;
+float power = 0;                 // init only..
+float go = 0;                    // init only..
 
-float magnify = 300;
-float rotation = 0;
-float radius = 0;
-int brightness = 0;
-int elements = 64;
 
 // Shapes
 String[] shapes = { "circle", "square", "rect", "x", "chSquare" };
 //String[] shapes = { "chSquare" };
-String shape = shapes[0];
+String shape = shapes[int(random(shapes.length))];
 
 void setup() {
   // Setup Screen
@@ -36,7 +45,7 @@ void setup() {
   
   // Setup Audio Source
   maxim = new Maxim(this);
-  player = maxim.loadFile("STUFFSONG.wav");
+  player = maxim.loadFile("MuchinGaround.mp3");
   player.setLooping(true);
   player.volume(1.0);
 }
@@ -46,7 +55,14 @@ void draw() {
     player.play();
     power = player.getAveragePower();
 //    spec = player.getPowerSpectrum();
-    go += power * 50;
+    go += amp * 50;
+    
+    // beat detection...
+    if ( power > threshold && wait < 0 ) {
+      amp += power;
+      wait += 10;
+    }
+    wait--;
   
     background(0); // clear the screen so we adhere to the frame rate.
     radius = map(xPos, 0, width, 0, 10);
@@ -60,8 +76,10 @@ void draw() {
     // cycle through time in a ping pong manner.
     time = time + 0.01;
     time2 = time + 0.5;
+    
+    // Radius is being set with xPos this hack makes it ping pong.
     if (pos) {
-      if (power > 0) {
+      if (power > thresh2) {
         xPos += 1;
         changeShape = true;
         fade = 0;
@@ -69,10 +87,11 @@ void draw() {
         if (changeShape) {
           changeShape = false;
           shape = shapes[int(random(shapes.length))];
+          elements = int(random(32, 124));
         }
       }
     } else {
-      if (power > 0 ) {
+      if (power > thresh2) {
         xPos -= 1;
         changeShape = true;
         fade = 0;
@@ -80,14 +99,17 @@ void draw() {
         if (changeShape) {
           changeShape = false;
           shape = shapes[int(random(shapes.length))];
+          elements = int(random(32, 124));
         }
       }
     }  
     if ( xPos == width || xPos == 0 ) {
       pos = !pos;
     }
-        
+
+    // Debug prints...        
     print(power + " ");
+    print(amp + " ");
     print(time % 15 + " ");
     print(go + " ");
     print(shape);
@@ -96,7 +118,7 @@ void draw() {
     // Draw all the sapes on the screen.
     for (int i = 0; i < elements; i++) {
       stroke(i * 2, 255, 255);
-      if (power > 0) {
+      if (amp > 0) {
         fill((5 * i + go) % 255, 255, brightness);
       } else {
         noFill();
@@ -125,7 +147,7 @@ void draw() {
     }
     
     // Fade to black when no lows are playing...
-    if ( power < 0 ) {
+    if ( power < fadeThresh ) {
       translate(0, 0);
       stroke(0);
       fill(0, 0, 0, fade);
