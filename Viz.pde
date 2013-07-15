@@ -8,26 +8,36 @@
 Maxim maxim;
 AudioPlayer player;
 
+// Audio File to load.
+String audioFile = "onesAndZeros.mp3";
+
+
+// Other variables which require tweaking...
+int elements = 64;               // this gets randomized later...
+float threshold = 0.25;           // used to in beat detection.
+float thresh2 = 0.33;            // used to control when shapes are chnaged and/or moved.
+float fadeThresh = 0.1;          // used to control when to fade to black.
+float magnify = random(200,400); // used to set how much of the screen we use or go out of...
+
+
+// Initialization of other variables used in the program...
 int xPos = 0;                    // init only..
 int brightness = 0;              // init only..
-int elements = 64;               // this gets randomized later...
 int wait = 0;                    // init only..
 int fade = 0;                    // init only..
+
 boolean playAudio;               // init only..
 boolean pos = true;              // init only.. (used to move through space)
 boolean changeShape = false;     // init only.. (used to determine if it's time to swich shapes)
-float threshold = 0.3;          // Adjust sensitivity. (change until beat is detected)
-float thresh2 = 0.38;
-float fadeThresh = 0.1;
+
 float amp = 0;                   // init only.. (used in beat detection.)
-float magnify = 400;             // used to set how much of the screen we use or go out of...
 float rotation = 0;              // init only..
 float radius = 0;                // init only..
 float time = 0;                  // init only..
 float time2 = 0;                 // init only..
-//float[] spec;
 float power = 0;                 // init only..
 float go = 0;                    // init only..
+//float[] spec;
 
 
 // Shapes
@@ -45,7 +55,7 @@ void setup() {
   
   // Setup Audio Source
   maxim = new Maxim(this);
-  player = maxim.loadFile("MuchinGaround.mp3");
+  player = maxim.loadFile(audioFile);
   player.setLooping(true);
   player.volume(1.0);
 }
@@ -107,13 +117,13 @@ void draw() {
       pos = !pos;
     }
 
-//    // Debug prints...        
-//    print(power + " ");
-//    print(amp + " ");
-//    print(time % 15 + " ");
-//    print(go + " ");
-//    print(shape);
-//    println();
+    // Debug prints...        
+    print(power + " ");
+    print(amp + " ");
+    print(time % 15 + " ");
+    print(go + " ");
+    print(shape);
+    println();
     
     // Draw all the sapes on the screen.
     for (int i = 0; i < elements; i++) {
@@ -152,7 +162,11 @@ void draw() {
       stroke(0);
       fill(0, 0, 0, fade);
       rect(0, 0, width, height);
-      if ( fade < 255 ) { fade += 2; }
+      if ( fade < 255 ) {
+        fade += 2;
+      } else {
+        magnify = random(200,400);
+      }
     }
   }
 }
