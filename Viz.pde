@@ -107,13 +107,13 @@ void draw() {
       pos = !pos;
     }
 
-    // Debug prints...        
-    print(power + " ");
-    print(amp + " ");
-    print(time % 15 + " ");
-    print(go + " ");
-    print(shape);
-    println();
+//    // Debug prints...        
+//    print(power + " ");
+//    print(amp + " ");
+//    print(time % 15 + " ");
+//    print(go + " ");
+//    print(shape);
+//    println();
     
     // Draw all the sapes on the screen.
     for (int i = 0; i < elements; i++) {
