@@ -6,19 +6,18 @@
 
 
 Maxim maxim;
+PImage titleImage;
 AudioPlayer player;
 
 // Audio File to load.
-String audioFile = "onesAndZeros.mp3";
-
+String audioFile = "STUFFSONG.mp3";
 
 // Other variables which require tweaking...
 int elements = 64;               // this gets randomized later...
-float threshold = 0.25;           // used to in beat detection.
-float thresh2 = 0.33;            // used to control when shapes are chnaged and/or moved.
+float threshold = 0.28;           // used to in beat detection. (the color)
+float thresh2 = 0.22;            // used to control when shapes are chnaged and/or moved.
 float fadeThresh = 0.1;          // used to control when to fade to black.
 float magnify = random(200,400); // used to set how much of the screen we use or go out of...
-
 
 // Initialization of other variables used in the program...
 int xPos = 0;                    // init only..
@@ -29,12 +28,14 @@ int fade = 0;                    // init only..
 boolean playAudio;               // init only..
 boolean pos = true;              // init only.. (used to move through space)
 boolean changeShape = false;     // init only.. (used to determine if it's time to swich shapes)
+boolean titleOn = true;          // init only..
 
 float amp = 0;                   // init only.. (used in beat detection.)
 float rotation = 0;              // init only..
 float radius = 0;                // init only..
 float time = 0;                  // init only..
 float time2 = 0;                 // init only..
+float time3 = 0;
 float power = 0;                 // init only..
 float go = 0;                    // init only..
 //float[] spec;
@@ -42,7 +43,6 @@ float go = 0;                    // init only..
 
 // Shapes
 String[] shapes = { "circle", "square", "rect", "x", "chSquare" };
-//String[] shapes = { "chSquare" };
 String shape = shapes[int(random(shapes.length))];
 
 void setup() {
@@ -53,10 +53,13 @@ void setup() {
   background(0);
   colorMode(HSB);
   
+  // Image.
+  titleImage = loadImage("STUFFSONG.png");
+  
   // Setup Audio Source
   maxim = new Maxim(this);
   player = maxim.loadFile(audioFile);
-  player.setLooping(true);
+  player.setLooping(false);
   player.volume(1.0);
 }
 
@@ -117,13 +120,13 @@ void draw() {
       pos = !pos;
     }
 
-    // Debug prints...        
-    print(power + " ");
-    print(amp + " ");
-    print(time % 15 + " ");
-    print(go + " ");
-    print(shape);
-    println();
+//    // Debug prints...        
+//    print(power + " ");
+//    print(amp + " ");
+//    print(time % 15 + " ");
+//    print(go + " ");
+//    print(shape);
+//    println();
     
     // Draw all the sapes on the screen.
     for (int i = 0; i < elements; i++) {
@@ -167,6 +170,18 @@ void draw() {
       } else {
         magnify = random(200,400);
       }
+      if ( fade > 100 ) {
+        image(titleImage, -590, 180);
+        titleOn = true;
+      }
+    }
+    if (titleOn) {
+        image(titleImage, -590, 180);
+        time3 += .6;
+        if (time3 > 200) {
+          time3 = 0;
+          titleOn = false;
+        }
     }
   }
 }
