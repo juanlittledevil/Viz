@@ -43,6 +43,7 @@ float go = 0;                    // init only..
 
 // Shapes
 String[] shapes = { "circle", "square", "rect", "x", "chSquare" };
+//String[] shapes = {"rect"};
 String shape = shapes[int(random(shapes.length))];
 
 void setup() {
@@ -148,7 +149,7 @@ void draw() {
       } else if ( shape == "chSquare" ) {
         rect(0,0,2 * i,2 * i, int(time2 % 50));
       } else if ( shape == "rect" ) {
-        rect(0,0,i, .5 * i);
+        rect(0,0,i, (.5 * i + go) % 20);
       } else if ( shape == "x") {
         rotate(PI/i * time);
         strokeWeight(int(random(1, 5)));
@@ -171,6 +172,7 @@ void draw() {
         magnify = random(200,400);
       }
       if ( fade > 100 ) {
+        tint(255, int(time3));
         image(titleImage, -590, 180);
         titleOn = true;
       }
