@@ -176,9 +176,10 @@ void draw() {
       }
     }
     if (titleOn) {
+        tint(255, int(time3));
         image(titleImage, -590, 180);
         time3 += .6;
-        if (time3 > 200) {
+        if (time3 > 255) {
           time3 = 0;
           titleOn = false;
         }
