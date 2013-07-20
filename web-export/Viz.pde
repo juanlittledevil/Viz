@@ -3,11 +3,15 @@
 // Author: Juan Segovia
 // Description: Audio Visualizer app. process audio from maxim player.
 // Created: 7/14/13
-
+//
+// =========================================================================================
+//     Globally defined variables.
+// =========================================================================================
 
 Maxim maxim;
 PImage titleImage;
 AudioPlayer player;
+MultiSlider ms;
 
 // Audio File to load.
 String audioFile = "STUFFSONG.mp3";
@@ -15,7 +19,8 @@ String audioFile = "STUFFSONG.mp3";
 // Other variables which require tweaking...
 int elements = 64;               // this gets randomized later...
 float threshold = 0.28;           // used to in beat detection. (the color)
-float thresh2 = 0.22;            // used to control when shapes are chnaged and/or moved.
+float thresh2 = 0.22;            // used to control expand.
+float thresh3 = 0.24;            // used to control when shapes are chnaged.
 float fadeThresh = 0.1;          // used to control when to fade to black.
 float magnify = random(200,400); // used to set how much of the screen we use or go out of...
 
@@ -43,8 +48,11 @@ float go = 0;                    // init only..
 
 // Shapes
 String[] shapes = { "circle", "square", "rect", "x", "chSquare" };
-//String[] shapes = {"rect"};
 String shape = shapes[int(random(shapes.length))];
+
+// =========================================================================================
+//       SETUP
+// =========================================================================================
 
 void setup() {
   // Setup Screen
@@ -62,13 +70,24 @@ void setup() {
   player = maxim.loadFile(audioFile);
   player.setLooping(false);
   player.volume(1.0);
+  
+  // Setup Sliders
+  String[] sliderNames = {"t1", "t2", "t3"};
+  ms = new MultiSlider(sliderNames.length, 0, 255, 10, 10, 200, 20, HORIZONTAL);
+  ms.setNames(sliderNames);
 }
+
+// =========================================================================================
+//      Draw udates the screen. This is by all means the (main method)
+// =========================================================================================
 
 void draw() {
   if (playAudio) {
+    // ============
+    // Audio  setup
+    // ============
     player.play();
     power = player.getAveragePower();
-//    spec = player.getPowerSpectrum();
     go += amp * 50;
     
     // beat detection...
@@ -77,59 +96,68 @@ void draw() {
       wait += 10;
     }
     wait--;
-  
-    background(0); // clear the screen so we adhere to the frame rate.
+ 
+    // ========
+    // Graphics
+    // ========
+    // Reset the screen prior to drawing new frame.
+    background(0);
+    strokeWeight(2);
+    noFill(); 
+    
+    // Variables used for movement are based on timers, and size of the screen.
     radius = map(xPos, 0, width, 0, 10);
     rotation = map(mouseY, 0, height, 0, 10);
     brightness = (int) map(power, 0, .5, 0, 255);
-    float spacing = TWO_PI/elements;
-    translate(width / 2, height / 2); // move everything to the middle of the screen
-    noFill(); // prevent the objects from blocking eachother.
-    strokeWeight(2);
     
+    // spacing is determined by the number of elemts and are aranged in a circle
+    float spacing = TWO_PI/elements;
+    
+    // move everything to the middle of the screen
+    translate(width / 2, height / 2);
+    
+    // ============
+    // Timed events
+    // ============
     // cycle through time in a ping pong manner.
+    // update time keepers.
     time = time + 0.01;
     time2 = time + 0.5;
-    
+        
     // Radius is being set with xPos this hack makes it ping pong.
-    if (pos) {
-      if (power > thresh2) {
-        xPos += 1;
-        changeShape = true;
-        fade = 0;
-      } else {
-        if (changeShape) {
-          changeShape = false;
-          shape = shapes[int(random(shapes.length))];
-          elements = int(random(32, 124));
-        }
-      }
-    } else {
-      if (power > thresh2) {
-        xPos -= 1;
-        changeShape = true;
-        fade = 0;
-      } else {
-        if (changeShape) {
-          changeShape = false;
-          shape = shapes[int(random(shapes.length))];
-          elements = int(random(32, 124));
-        }
-      }
-    }  
     if ( xPos == width || xPos == 0 ) {
       pos = !pos;
     }
 
-//    // Debug prints...        
-//    print(power + " ");
-//    print(amp + " ");
-//    print(time % 15 + " ");
-//    print(go + " ");
-//    print(shape);
-//    println();
+    if (power > thresh2) {
+      if (pos) {
+        xPos += 1;
+      } else {
+        xPos -= 1;
+      }
+    }
+
+      
+    // Change the shapes on the screen at random.
+    if (power > thresh3) {
+      changeShape = true;
+      
+      // reset the fade amount so we see stuff on the screen.
+      fade = 0;
+      
+    } else {
+      // if changeSpae is true and power is less than threshold
+      // let's change stuff.
+      if (changeShape) {
+        changeShape = false;
+        shape = shapes[int(random(shapes.length))];
+        elements = int(random(32, 124));
+      }
+    }
     
+    // =================================
     // Draw all the sapes on the screen.
+    // =================================
     for (int i = 0; i < elements; i++) {
       stroke(i * 2, 255, 255);
       if (amp > 0) {
@@ -160,7 +188,9 @@ void draw() {
       popMatrix();
     }
     
+    // =========================================
     // Fade to black when no lows are playing...
+    // =========================================
     if ( power < fadeThresh ) {
       translate(0, 0);
       stroke(0);
@@ -177,17 +207,25 @@ void draw() {
         titleOn = true;
       }
     }
+    
+    // ====================
+    // Draw the title image
+    // ====================
     if (titleOn) {
-        tint(255, int(time3));
-        image(titleImage, -590, 180);
-        time3 += .6;
-        if (time3 > 255) {
-          time3 = 0;
-          titleOn = false;
-        }
+      tint(255, int(time3));
+      image(titleImage, -590, 180);
+      time3 += .6;
+      if (time3 > 255) {
+        time3 = 0;
+        titleOn = false;
+      }
     }
   }
 }
+
+// =========================================================================================
+//   EVENTS
+// =========================================================================================
 
 void mousePressed() {
   playAudio = !playAudio;
