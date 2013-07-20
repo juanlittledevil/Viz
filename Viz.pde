@@ -11,7 +11,6 @@
 Maxim maxim;
 PImage titleImage;
 AudioPlayer player;
-MultiSlider ms;
 
 // Audio File to load.
 String audioFile = "STUFFSONG.mp3";
@@ -71,10 +70,6 @@ void setup() {
   player.setLooping(false);
   player.volume(1.0);
   
-  // Setup Sliders
-  String[] sliderNames = {"t1", "t2", "t3"};
-  ms = new MultiSlider(sliderNames.length, 0, 255, 10, 10, 200, 20, HORIZONTAL);
-  ms.setNames(sliderNames);
 }
 
 // =========================================================================================
@@ -107,7 +102,7 @@ void draw() {
     
     // Variables used for movement are based on timers, and size of the screen.
     radius = map(xPos, 0, width, 0, 10);
-    rotation = map(mouseY, 0, height, 0, 10);
+    rotation = map(int(time2 % height), 0, height, 0, 10);
     brightness = (int) map(power, 0, .5, 0, 255);
     
     // spacing is determined by the number of elemts and are aranged in a circle
