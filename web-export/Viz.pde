@@ -40,6 +40,7 @@ float radius = 0;                // init only..
 float time = 0;                  // init only..
 float time2 = 0;                 // init only..
 float time3 = 0;
+float time4 = 1;
 float power = 0;                 // init only..
 float go = 0;                    // init only..
 //float[] spec;
@@ -168,6 +169,12 @@ void draw() {
       if ( shape == "circle" ) {
         ellipse(0,0,2 * i,2 * i);
       } else if ( shape == "square" ) {
+        translate(width/time4 % 10, int(height/time4));
+        time4 = time4 + 0.001;
+        if (time4 > 25.0) {
+          time4 = 1;
+        }
+        rotate(HALF_PI/time4);
         rect(0,0,2 * i,2 * i, 8);
       } else if ( shape == "chSquare" ) {
         rect(0,0,2 * i,2 * i, int(time2 % 50));
